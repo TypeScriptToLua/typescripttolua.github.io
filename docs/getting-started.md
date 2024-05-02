@@ -116,7 +116,9 @@ Additionally, type declarations exist for some games:
 - [The Binding of Isaac: Rebirth](https://isaacscript.github.io)
 - [ComputerCraft (Minecraft)](https://github.com/MCJack123/cc-tstl-template)
 - [Dota 2](https://github.com/ModDota/API/tree/master/declarations/server) ([template](https://github.com/ModDota/TypeScriptAddonTemplate))
-- [Factorio](https://github.com/GlassBricks/typed-factorio)
+- Factorio
+  - [typed-factorio](https://github.com/GlassBricks/typed-factorio)
+  - [factorio-types](https://github.com/sguest/factorio-types)
 - [Garry's Mod](https://github.com/lolleko/gmod-typescript)
 - [Retro Gadget](https://github.com/DarkMio/retro-gadgets-typedefs) ([template](https://github.com/DarkMio/retro-gadgets-template))
 - [Tabletop Simulator](https://github.com/stevenlafl/tts-typescript)
