@@ -45,7 +45,7 @@ function onAbilityCast(caster, targetLocation)
         friend:givePoints(500)
     end
 end
-`
+`;
 
 export function getInitialCode() {
     if (window.location.hash.startsWith("#src=")) {

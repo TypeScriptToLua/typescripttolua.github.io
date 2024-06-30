@@ -82,12 +82,13 @@ function InputPane() {
 
     const onChange: OnChange = useCallback(
         debounce((newValue) => {
-            if (myWorker && myEditor)
-            {
+            if (myWorker && myEditor) {
                 updateCodeHistory(newValue ?? "");
                 updateModel(myWorker, myEditor.getModel()!);
             }
-            }, 250), [] );
+        }, 250),
+        [],
+    );
 
     const { activePanel } = useContext(PanelContext);
 
