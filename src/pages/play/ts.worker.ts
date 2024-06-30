@@ -59,6 +59,7 @@ export class CustomTypeScriptWorker extends TypeScriptWorker {
         compilerOptions.luaLibImport = tstl.LuaLibImportKind.Inline;
         compilerOptions.luaTarget = tstl.LuaTarget.Lua53;
         compilerOptions.sourceMap = true;
+        compilerOptions.configFilePath = compilerOptions.rootDir + "tsconfig.json";
 
         let ast: tstl.File | undefined;
         let lua: string | undefined;
