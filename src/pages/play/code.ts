@@ -42,7 +42,7 @@ function onAbilityCast(caster, targetLocation)
         function(____, unit) return caster:isFriend(unit) end
     )
     for ____, friend in ipairs(friends) do
-        friend:givePoints(500)
+        friend:givePoints(50)
     end
 end
 `;
