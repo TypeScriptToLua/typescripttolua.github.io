@@ -1,12 +1,12 @@
 import { useColorMode } from "@docusaurus/theme-common";
 import clsx from "clsx";
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import { JSONTree } from "react-json-tree";
-import MonacoEditor from "react-monaco-editor";
+import MonacoEditor, { OnChange, OnMount } from "@monaco-editor/react";
 import tstlPackageJson from "typescript-to-lua/package.json";
 import tsPackageJson from "typescript/package.json";
 import { debounce } from "../../utils";
-import { getInitialCode, updateCodeHistory } from "./code";
+import { getInitialCode, getInitialLua, updateCodeHistory } from "./code";
 import { ConsoleMessage, executeLua } from "./execute";
 import { monaco, useMonacoTheme } from "./monaco";
 import styles from "./styles.module.scss";
@@ -41,14 +41,13 @@ interface EditorState {
 
 const EditorContext = React.createContext<EditorContext>(null!);
 interface EditorContext extends EditorState {
-    updateModel(model: monaco.editor.ITextModel): void;
+    updateModel(worker: monaco.languages.typescript.TypeScriptWorker, model: monaco.editor.ITextModel): void;
 }
 
 function EditorContextProvider({ children }: { children: React.ReactNode }) {
     const [state, setState] = useState<EditorState>({ source: "", lua: "", ast: {}, sourceMap: "", results: [] });
-    const updateModel = useCallback<EditorContext["updateModel"]>(async (model) => {
-        const getWorker = await monaco.languages.typescript.getTypeScriptWorker();
-        const client = (await getWorker(model.uri)) as CustomTypeScriptWorker;
+    const updateModel = useCallback<EditorContext["updateModel"]>(async (worker, model) => {
+        const client = worker as CustomTypeScriptWorker;
         const { lua, ast, sourceMap } = await client.getTranspileOutput(model.uri.toString());
         const source = model.getValue();
 
@@ -69,17 +68,24 @@ const commonMonacoOptions: monaco.editor.IEditorConstructionOptions = {
 
 function InputPane() {
     const theme = useMonacoTheme();
-    const ref = useRef<MonacoEditor>(null);
     const { updateModel } = useContext(EditorContext);
 
-    useEffect(() => {
-        updateModel(ref.current!.editor!.getModel()!);
-    }, []);
+    let myWorker: monaco.languages.typescript.TypeScriptWorker | undefined = undefined;
+    let myEditor: monaco.editor.IStandaloneCodeEditor | undefined = undefined;
 
-    const onChange = useCallback(
-        debounce((newValue: string) => {
-            updateCodeHistory(newValue);
-            updateModel(ref.current!.editor!.getModel()!);
+    const onMount: OnMount = async (editor, monaco) => {
+        myEditor = editor;
+        const workerGetter = await monaco.languages.typescript.getTypeScriptWorker();
+        myWorker = await workerGetter(editor.getModel()!.uri);
+        updateModel(myWorker, editor.getModel()!);
+    };
+
+    const onChange: OnChange = useCallback(
+        debounce((newValue) => {
+            if (myWorker && myEditor) {
+                updateCodeHistory(newValue ?? "");
+                updateModel(myWorker, myEditor.getModel()!);
+            }
         }, 250),
         [],
     );
@@ -93,8 +99,8 @@ function InputPane() {
                 language="typescript"
                 defaultValue={getInitialCode()}
                 options={commonMonacoOptions}
+                onMount={onMount}
                 onChange={onChange}
-                ref={ref}
             />
         </div>
     );
@@ -174,6 +180,7 @@ function OutputPane() {
                     <MonacoEditor
                         theme={theme}
                         language="lua"
+                        defaultValue={getInitialLua()}
                         value={lua}
                         options={{
                             ...commonMonacoOptions,
