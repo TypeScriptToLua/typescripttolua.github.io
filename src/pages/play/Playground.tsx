@@ -2,16 +2,17 @@ import { useColorMode } from "@docusaurus/theme-common";
 import clsx from "clsx";
 import React, { useCallback, useContext, useMemo, useState } from "react";
 import { JSONTree } from "react-json-tree";
-import MonacoEditor, { OnChange, OnMount } from "@monaco-editor/react";
+import MonacoEditor, { BeforeMount, OnChange, OnMount } from "@monaco-editor/react";
 import tstlPackageJson from "typescript-to-lua/package.json";
 import tsPackageJson from "typescript/package.json";
 import { debounce } from "../../utils";
-import { getInitialCode, getInitialLua, updateCodeHistory } from "./code";
+import { getInitialCode, updateCodeHistory } from "./code";
 import { ConsoleMessage, executeLua } from "./execute";
 import { monaco, useMonacoTheme } from "./monaco";
 import styles from "./styles.module.scss";
 import { jsonTreeTheme } from "./themes";
 import type { CustomTypeScriptWorker } from "./ts.worker";
+import { baseCompilerOptions } from "./compilerConfig";
 
 enum PanelKind {
     Input,
@@ -90,6 +91,34 @@ function InputPane() {
         [],
     );
 
+    const beforeMount: BeforeMount = (monaco) => {
+        monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+            ...monaco.languages.typescript.typescriptDefaults.getCompilerOptions(),
+            ...baseCompilerOptions,
+        });
+
+        // // TODO: Generate it from lua-types/5.4.d.ts
+        for (const module of [
+            require("!!raw-loader!@typescript-to-lua/language-extensions/index.d.ts"),
+            require("!!raw-loader!lua-types/core/coroutine.d.ts"),
+            require("!!raw-loader!lua-types/core/global.d.ts"),
+            require("!!raw-loader!lua-types/core/math.d.ts"),
+            require("!!raw-loader!lua-types/core/metatable.d.ts"),
+            require("!!raw-loader!lua-types/core/string.d.ts"),
+            require("!!raw-loader!lua-types/core/table.d.ts"),
+            require("!!raw-loader!lua-types/core/coroutine.d.ts"),
+            require("!!raw-loader!lua-types/core/coroutine.d.ts"),
+            require("!!raw-loader!lua-types/core/coroutine.d.ts"),
+            require("!!raw-loader!lua-types/core/coroutine.d.ts"),
+            require("!!raw-loader!lua-types/special/5.2-plus.d.ts"),
+            require("!!raw-loader!lua-types/special/5.2-plus-or-jit.d.ts"),
+            require("!!raw-loader!lua-types/special/5.3-plus.d.ts"),
+            require("!!raw-loader!lua-types/special/5.4-pre.d.ts"),
+        ]) {
+            monaco.languages.typescript.typescriptDefaults.addExtraLib(module.default);
+        }
+    };
+
     const { activePanel } = useContext(PanelContext);
 
     return (
@@ -99,6 +128,7 @@ function InputPane() {
                 language="typescript"
                 defaultValue={getInitialCode()}
                 options={commonMonacoOptions}
+                beforeMount={beforeMount}
                 onMount={onMount}
                 onChange={onChange}
             />
@@ -180,7 +210,7 @@ function OutputPane() {
                     <MonacoEditor
                         theme={theme}
                         language="lua"
-                        defaultValue={getInitialLua()}
+                        defaultValue="starting transpiler..."
                         value={lua}
                         options={{
                             ...commonMonacoOptions,

@@ -54,13 +54,6 @@ export class CustomTypeScriptWorker extends TypeScriptWorker {
         const program = this._languageService.getProgram()!;
         const sourceFile = program.getSourceFile(fileName)!;
 
-        const compilerOptions: tstl.CompilerOptions = program.getCompilerOptions();
-        compilerOptions.rootDir = "inmemory://model/";
-        compilerOptions.luaLibImport = tstl.LuaLibImportKind.Inline;
-        compilerOptions.luaTarget = tstl.LuaTarget.Lua53;
-        compilerOptions.sourceMap = true;
-        compilerOptions.configFilePath = compilerOptions.rootDir + "tsconfig.json";
-
         let ast: tstl.File | undefined;
         let lua: string | undefined;
         let sourceMap: string | undefined;
