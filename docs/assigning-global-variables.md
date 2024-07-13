@@ -160,7 +160,7 @@ const registerClass =
   };
 ```
 
-Now instead of taking the global name from the class, you a custom name yourself:
+Now instead of taking the global name from the class, you can specify a custom name yourself:
 
 ```typescript
 @registerClass("CustomGlobalName")
