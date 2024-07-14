@@ -4,7 +4,7 @@ title: Setting global variables or functions
 
 import { SideBySide } from "@site/src/components/SideBySide";
 
-In some Lua environments, the host application expects you to define some global variables or functions as part of the API. For example, some engines might allow you to define some event handlers in your Lua, that will be called by the engine when different events happen:
+In some Lua environments, the host application expects you to define global variables or functions as part of the API. For example, some engines might allow you to define some event handlers in your Lua, that will be called by the engine when different events happen:
 
 ```lua title=example.lua
 function OnStart()
@@ -38,11 +38,31 @@ end
 
 </SideBySide>
 
-This means we need some extra helper code to correctly register these global variables so your environment can access them.
+This means we need extra helper code to correctly register these global variables so your environment can access them.
+
+## Assigning to globals with declarations
+
+The easiest way to set global variables is to first declare them as existing globals, and then assign their values. As an example:
+
+```ts
+declare var OnStart: (this: void) => void;
+declare var OnStateChanged: (this: void, newState: State) => void;
+
+OnStart = () => {
+  // start event handling code
+};
+OnStateChanged = (newState: State) => {
+  // state change event handler code
+};
+```
+
+In the example above, the declarations are in the same file as the value assignments. Alternatively, you could choose to put them in a .d.ts file included in your project. If these globals have pre-defined names specified by the engine the API, it is also possible to include these declarations in the .d.ts files (or types package) for this environment.
 
 ## Setting global variables with a helper function
 
-One way to assign global variables and functions is to use a helper function like this:
+Another way to assign global variables and functions is to use a helper function. The benefit is that you can strictly type the helper functions to ensure correct types are assigned, as well as having the ability to do additional logic like wrapping or modifying the value.
+
+The simplest helper function looks like this:
 
 ```typescript
 function registerEventHandler<TArgs extends unknown[]>(
@@ -78,7 +98,7 @@ function registerGlobalVariable<T>(variableName: string, value: T): void {
 
 ## Registering functions as class methods with a decorator
 
-Sometimes you don't want to register just a loose function, but instead register a class or class method. A very nice way to do this is to use decorators (they unfortunately only work on classes, and not for loose functions).
+Sometimes you don't want to register just a loose function, but instead register a class or class method. A nice way to do this is to use decorators (they unfortunately only work on classes, and not for loose functions).
 
 One example of such a decorator is:
 
@@ -117,7 +137,7 @@ In the above example, `this` will be `nil` in the methods, do not try to use oth
 
 ## Registering classes with a decorator
 
-Sometimes you want to register classes as globals, you can also do that with a decorator:
+Sometimes you want to register classes instead of functions, you can also do that with a decorator:
 
 ```typescript
 function registerClass<TClass, TArgs extends unknown[]>(
@@ -173,27 +193,3 @@ class EventHandlers {
   }
 }
 ```
-
-## Assigning to globals with declarations
-
-The main weakness of the above methods is that you can declare any string, not protecting you from typos, and not giving any kind of editor support. This is fine if there are only a few such registrations that need to be done, but is somewhat error prone.
-
-An alternative method would be to explicitly declare the global variables in a declarations file:
-
-```ts
-declare var OnStart: (this: void) => void;
-declare var OnStateChanged: (this: void, newState: State) => void;
-```
-
-You can then assign to these functions as if they were global variables:
-
-```typescript
-OnStart = () => {
-  // start event handling code
-};
-OnStateChanged = (newState: State) => {
-  // state change event handler code
-};
-```
-
-This of course only works if you know the names of the global variables beforehand, if these names are dynamic, consider using one of the other methods instead.
