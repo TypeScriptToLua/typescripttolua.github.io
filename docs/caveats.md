@@ -209,3 +209,35 @@ for (const featureClass of FEATURE_CLASSES) {
 ```
 
 Importatly, once we have a barrel file, we do not have to artificially split up the number of classes. This is because TSTL does not transpile exports with any local variables at all. Thus, we can have an unlimited number of exports inside of the barrel file without ever hitting the Lua local variable limit.
+
+### Avoid Type Assertions
+
+Due to some optimizations which depend on type correctness, you should keep in mind that using Type Assertions may have an effect on transpiled code, and can in some cause unexpected behavior. 
+> If you want to be on the safe side, we recommend that you don't use Type Assertions.
+
+#### Example
+```
+const someObj = {} as {x: number}
+const y = true ? someObj.x : 5
+```
+
+The value of y would be 5 ! (And not `nil`)
+This because the type says `someObj.x` exists and is not "falsy", so instead of a safe transpile (with `if..else..`), we optimize and use LUA's Ternary-Like construct:
+```
+local y = true and someObj.x or 5
+```
+Because `someObj.x` is `nil` at runtime, then y will be 5. (That is how LUA works)
+
+#### Lint rule
+
+You may even want to prevent Type Assertions completely, by using [ESLint](https://eslint.org) with a rule such as:
+```json
+{
+  "rules": {
+    "@typescript-eslint/consistent-type-assertions": ["error", {
+      "assertionStyle": "never"
+    }]
+  }
+}
+```
+
