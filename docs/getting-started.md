@@ -105,13 +105,15 @@ These declarations do not come with `tstl` by default because most of the time, 
 
 ### Type Declaration Packages - Unofficial
 
-Type declarations exist for some common Lua environments:
+The TypeScriptToLua community has made unofficial type declarations for various things. (If you have made your own type declarations, you can click on the "Edit this page" link below to add them to the list.)
+
+#### Game Engines
 
 - [Defold Game Engine](https://github.com/ts-defold/types)
 - [LÖVE 2D Game Engine](https://github.com/hazzard993/love-typescript-definitions)
 - [Minetest](https://github.com/RepComm/mt-api)
 
-Additionally, type declarations exist for some games:
+#### Games
 
 - [The Binding of Isaac: Rebirth](https://isaacscript.github.io)
 - [ComputerCraft (Minecraft)](https://github.com/MCJack123/cc-tstl-template)
@@ -126,8 +128,6 @@ Additionally, type declarations exist for some games:
 - [World of Warcraft WOTLK](https://github.com/araxiaonline/wow-wotlk-declarations) ([eluna module builder](https://github.com/araxiaonline/wow-eluna-ts-module))
 - [World of Warcraft Classic](https://github.com/wartoshika/wow-classic-declarations)
 
-Type declarations for databases:
+#### Databases
 
 - [Tarantool](https://github.com/vitaliy-art/tarantoolscript)
-
-(If you have created type declarations for a new game, you can click on the "Edit this page" link below to add it to the list.)
